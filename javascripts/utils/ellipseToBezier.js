@@ -24,7 +24,7 @@ function mag(a,b){
 }
 
 
-export default function bezEllipse({
+function bezEllipse({
     start,
     end,
     dir,
@@ -110,4 +110,28 @@ export default function bezEllipse({
     end
   ]
   
+}
+
+
+export default function ellipseToCubicCommands(config){
+    const path = bezEllipse(config);
+    let d = [{
+        command: 'M',
+        params: [path[0].x, path[0].y]
+    }];
+    for (let i=0; i<(path.length-1)/3; i++){
+        const p = path.slice(i*3 + 1, i*3 + 4);
+        d.push({
+            command: 'C',
+            params: [
+                p[0].x, 
+                p[0].y, 
+                p[1].x, 
+                p[1].y,
+                p[2].x,
+                p[2].y
+            ]
+        })
+    }
+    return d;
 }
