@@ -6,7 +6,7 @@ import absoluteCommands from './utils/absoluteCommands';
 import cubicCommands from './utils/cubicCommands';
 
 
-const d = 'M -20 -30 L 10 50 A 150 80 30 1 1 0 100 q 20 40 40 -80 l 70 70 q 30 30 -100 -40 T 60 30 Z'
+const d = 'M -20 -30 L 10 50 A 150 80 30 1 1 0 100 q 20 40 40 -80 l 70 70 q 30 30 -100 -40 T 60 30 C -30 -100 50 50 200 -100 s -30 30 -120 -50 Z'
 
 const cubics = cubicCommands(absoluteCommands(parsePath(d)));
 
