@@ -23,16 +23,6 @@ function mag(a,b){
   return Math.sqrt(x*x + y*y);
 }
 
-// let start = {x: 10, y: 50};
-// let end = {x: 0, y: 50};
-// const dir = 1;
-
-// const Rx = 150;
-// const Ry = 80;
-
-// const rotation = 10;
-// const sweep = 1;
-
 
 export default function bezEllipse({
     start,
