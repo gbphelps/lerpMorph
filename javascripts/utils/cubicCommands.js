@@ -1,17 +1,32 @@
+import ellipseToBezier from './ellipseToBezier';
+import bumpDegree from './bumpDegree';
+
 //translates all commands into their corresponding cubic bezier
 //(approximates ellipses with bezier segments so that no bezier
 //is responsible for an arclength spanning more than PI radians)
 
 
-function cubicCommands(absoluteCommands){
+export default function cubicCommands(absoluteCommands){
     const cubics = [];
-    const accepted = new Set(['M','C','A'])
+    const accepted = new Set(['M','C'])
     
     for (let i = 0; i < absoluteCommands.length; i++){
       const command = absoluteCommands[i];
      
       if (accepted.has(command.type)){
         cubics.push(command);
+        continue;
+      }
+
+      if (command.type === 'A'){
+        let prev = absoluteCommands[i-1].params;
+        const [Rx, Ry, rotation, sweep, dir, x, y] = command.params;
+        const end = {x, y};
+        const start = {x: prev[prev.length-2], y: prev[prev.length-1]}
+        const newCommands = ellipseToBezier({
+          Rx, Ry, rotation, sweep, dir, start, end, maxTheta: Math.PI
+        });
+        for (let i=1; i<newCommands.length; i++) cubics.push(newCommands[i]);
         continue;
       }
       

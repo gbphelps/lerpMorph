@@ -122,7 +122,7 @@ export default function ellipseToCubicCommands(config){
     for (let i=0; i<(path.length-1)/3; i++){
         const p = path.slice(i*3 + 1, i*3 + 4);
         d.push({
-            command: 'C',
+            type: 'C',
             params: [
                 p[0].x, 
                 p[0].y, 

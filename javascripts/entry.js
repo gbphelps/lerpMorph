@@ -1,28 +1,42 @@
 import ellipseToBezier from './utils/ellipseToBezier';
 
-let start = {x: 10, y: 50};
-let end = {x: 0, y: 50};
-const dir = 1;
 
-const Rx = 150;
-const Ry = 80;
+import parsePath from './utils/parsePath';
+import absoluteCommands from './utils/absoluteCommands';
+import cubicCommands from './utils/cubicCommands';
 
-const rotation = 30;
-const sweep = 1;
-const maxTheta = Math.PI;
 
-//////////////
+const d = 'M -20 -30 L 10 50 A 150 80 30 1 1 0 100 q 20 40 40 -80 l 70 70 q 30 30 -100 -40 T 60 30 Z'
+
+const cubics = cubicCommands(absoluteCommands(parsePath(d)));
+
+console.log(cubics)
+
+
+
 
 const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
 svg.setAttribute('viewBox', '-300 -300 600 600');
 svg.setAttribute('height', 500);
 
-const d = ellipseToBezier({start, end, dir, Rx, Ry, rotation, sweep, maxTheta});
+
+
+const path2 = document.createElementNS('http://www.w3.org/2000/svg','path');
+path2.setAttribute('d', d);
+path2.setAttribute('fill', 'transparent');
+path2.setAttribute('stroke', 'black');
+path2.setAttribute('stroke-width',10);
+
 const path = document.createElementNS('http://www.w3.org/2000/svg','path');
-path.setAttribute('d', d.map(c => c.command + c.params.join(',')).join() );
+const dNew = cubics.map(c => c.type + c.params.join(',')).join();
+console.log(dNew)
+path.setAttribute('d', dNew);
+path.setAttribute('fill', 'transparent');
+path.setAttribute('stroke', 'aqua')
 
 
 document.addEventListener('DOMContentLoaded',()=>{
     document.body.appendChild(svg);
+    svg.appendChild(path2);
     svg.appendChild(path);
 })

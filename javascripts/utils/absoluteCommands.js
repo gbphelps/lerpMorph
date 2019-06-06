@@ -7,7 +7,7 @@
 */
 
 
-function absoluteCommands(commands){
+export default function absoluteCommands(commands){
   
     const degenerateCommands = new Set(['H', 'V', 'h', 'v']);
     const relativeCommands = new Set(['m','l','c','q','s','t','a']);
