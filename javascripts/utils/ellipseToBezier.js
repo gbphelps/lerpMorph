@@ -1,5 +1,5 @@
 import rotate from '../vectors/rotate';
-
+import bumpDegree from './bumpDegree';
 
 /*
 
@@ -8,9 +8,8 @@ Ellipses are a pain, so the algorithm below just transforms the space by
 (2) scaling one of the axes to "unsquish" the ellipse into a circle. 
 The algorithm then solves for the bezier control points in the transformed space as if the shape were a circle, and finally applies the reverse transformations to the control points before the bezier is drawn.
 Bezier curves can approximate arcs super well, it turns out. However, at some point beyond pi radians, that approximation starts to fall apart. For this reason, the algorithm takes a max theta and divides the arc into as many sub-arcs as needed so that no arc angle exceeds the max theta. 
-
-The function errors out for sets of parameters that have no arc solution (in contrast, SVG patches the non-existent curve with a half arc - need to examine the w3 spec so that I can match this behavior)
 */
+
 
 function norm(a){
   const div = Math.sqrt(a.x*a.x + a.y*a.y);
@@ -35,6 +34,10 @@ function bezEllipse({
     maxTheta
 }){
   
+  if (!Rx || !Ry){
+    return bumpDegree(bumpDegree([start,end]))
+  }
+  
   function map(a){
     let result = rotate(a, -rotation* Math.PI/180);
     return {x: result.x * Ry/Rx, y: result.y}
@@ -48,6 +51,11 @@ function bezEllipse({
   let startMap = map(start);
   let endMap= map(end);
 
+  if (Ry < 0.5 * mag(startMap,endMap)){
+    const ratio = Rx/Ry;
+    Ry = 0.5 * mag(startMap,endMap);
+    Rx = ratio * Ry;
+  }
 
   let mid = { x: (startMap.x + endMap.x) / 2, y: (startMap.y + endMap.y) / 2 }
   let slope = norm({ x: endMap.x - startMap.x, y: endMap.y - startMap.y });
