@@ -1,6 +1,3 @@
-import splitAt from './utils/splitAtLength';
-import { lineIntersection } from './utils/intersections';
-
 document.addEventListener('DOMContentLoaded',populate);
 
 function populate(){
@@ -10,13 +7,12 @@ function populate(){
     svg.setAttribute('viewBox', '0 0 200 200');
     svg.style.background = 'black';
 
-    const line1 = [{x:50, y: 70},{x: 150, y: 10}];
-    const line2 = [{x:100, y: 20},{x:50, y: 200}];
-    const intersection = lineIntersection(line1, line2);
+    const line1 = [{x:0, y: 0},{x: 50, y: 400},{x: 100, y: -200},{x: 150, y: 200}];
+    const line2 = [{x:0, y: 80},{x:400, y: 90},{x: -200, y: 100},{x: 200, y: 110}];
 
     [line1,line2].forEach(line => {
         const path = document.createElementNS('http://www.w3.org/2000/svg','path');
-        path.setAttribute('d', `M ${line[0].x} ${line[0].y} L ${line[1].x} ${line[1].y}`);
+        path.setAttribute('d', `M ${line[0].x} ${line[0].y} C ${line[1].x} ${line[1].y} ${line[2].x} ${line[2].y} ${line[3].x} ${line[3].y}`);
         path.setAttribute('fill', 'transparent');
         path.setAttribute('stroke', 'magenta');
         svg.appendChild(path);
@@ -24,8 +20,6 @@ function populate(){
 
     const circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
     circle.setAttribute('r', 2);
-    circle.setAttribute('cx', intersection.x);
-    circle.setAttribute('cy', intersection.y);
     circle.setAttribute('fill', 'red');
     svg.appendChild(circle);
 
