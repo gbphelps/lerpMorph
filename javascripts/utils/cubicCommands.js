@@ -24,7 +24,7 @@ export default function cubicCommands(absoluteCommands){
         const end = {x, y};
         const start = {x: prev[prev.length-2], y: prev[prev.length-1]}
         const newCommands = ellipseToBezier({
-          Rx, Ry, rotation, sweep, dir, start, end, maxTheta: Math.PI
+          Rx, Ry, rotation, sweep, dir, start, end, maxTheta: Math.PI/2
         });
         for (let i=1; i<newCommands.length; i++) cubics.push(newCommands[i]);
         continue;

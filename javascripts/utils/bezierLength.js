@@ -1,10 +1,6 @@
 //this is WAY faster O(1) vs O(log(n)) than the approximation used in the other pen and WAY more precise. You can use a higher order approximation (e.g. Six-point or Seven-point quadrature) if you need even more precision. Convergence is incredibly fast. https://en.wikipedia.org/wiki/Gaussian_quadrature
 
-
-
-const points = [{x: 0, y: 20},{x: 100, y: 0},{x: 40, y: 100}, {x: 0, y: 100}];
-
-function arcLength(controlPoints){
+export default function arcLength(controlPoints){
   function deriv(c){
     return function(t){
         return -3*c[0] * (1-t)*(1-t) +
@@ -32,15 +28,17 @@ function arcLength(controlPoints){
   (322-13*Math.sqrt(70))/900
 ];
 
-  const X = deriv(controlPoints.map(p => p.x));
-  const Y = deriv(controlPoints.map(p => p.y));
+  const dxdt = deriv(controlPoints.map(p => p.x));
+  const dydt = deriv(controlPoints.map(p => p.y));
   
+  //derivative of arclength; the thing to be integrated
   function d_arcLength(t){
-    const x = X(t);
-    const y = Y(t);
+    const x = dxdt(t);
+    const y = dydt(t);
     return Math.sqrt(x*x + y*y)
   }
   
+  //Gaussian quadrature to implement integration
   function integral(t0, t1){
     let sum = 0;
     for (let i=0; i<5; i++){
@@ -50,6 +48,8 @@ function arcLength(controlPoints){
     return sum;
   }
   
+  //arcLength returns a function that takes in a start t and an end t,
+  //and then spits out the length from start to end.
   return function(start,end){
     return integral(start,end)
   }
@@ -57,6 +57,4 @@ function arcLength(controlPoints){
 }
 
 
-const a = arcLength(points);
-
-console.log(a(0,.5));
+//todo: implement a binary search function that repeatedly splits the bezier and calls arcLength until the correct length has been achieved.

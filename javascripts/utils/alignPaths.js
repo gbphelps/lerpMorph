@@ -1,0 +1,1 @@
+// command {type: CHAR; params: float[] }

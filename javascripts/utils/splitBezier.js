@@ -8,13 +8,7 @@ const p = [
   
   
   ///////////////////////////////
-  
-  
-  
-  
-  
-  
-  
+
   function mult(a,b){
       return {x: a.x * b, y: a.y * b}
   }
@@ -51,6 +45,7 @@ const p = [
       }
   }
   
+  //get the deCastlejau net @ t
   function intermediates(arr){
       return function (t){
           const sets = [];
@@ -71,7 +66,8 @@ const p = [
   }
   
   
-  function splitBez(arr,t){
+  //takes an array of control points and splits the curve at a given value of t
+  export default function splitBez(arr,t){
       const sets = intermediates(arr)(t);
       const p1 = [];
       const p2 = [];
@@ -86,24 +82,3 @@ const p = [
       ]
   }
   
-  const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-  svg.setAttribute('viewBox', '0 0 100 100');
-  svg.setAttribute('height', 300);
-  
-  const path = document.createElementNS('http://www.w3.org/2000/svg','path');
-  path.setAttribute('d',`M ${p[0].x} ${p[0].y} C ${p[1].x} ${p[1].y} ${p[2].x} ${p[2].y} ${p[3].x} ${p[3].y}`);
-  path.setAttribute('fill', 'transparent');
-  path.setAttribute('stroke', 'black');
-  path.setAttribute('stroke-width', 5);
-  document.body.appendChild(svg);
-  svg.appendChild(path);
-  
-  const halves = splitBez(p,.4);
-  const colors = ['red', 'aqua'];
-  halves.forEach((h,i) => {
-    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
-    path.setAttribute('d', `M ${h[0].x} ${h[0].y} C ${h[1].x} ${h[1].y} ${h[2].x} ${h[2].y} ${h[3].x} ${h[3].y}`);
-    path.setAttribute('fill', 'transparent');
-    path.setAttribute('stroke', colors[i]);
-    svg.appendChild(path);
-  })

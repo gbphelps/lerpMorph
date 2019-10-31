@@ -1,42 +1,33 @@
-import ellipseToBezier from './utils/ellipseToBezier';
+import splitAt from './utils/splitAtLength';
+import { lineIntersection } from './utils/intersections';
 
+document.addEventListener('DOMContentLoaded',populate);
 
-import parsePath from './utils/parsePath';
-import absoluteCommands from './utils/absoluteCommands';
-import cubicCommands from './utils/cubicCommands';
+function populate(){
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('height', 200);
+    svg.setAttribute('width', 200);
+    svg.setAttribute('viewBox', '0 0 200 200');
+    svg.style.background = 'black';
 
+    const line1 = [{x:50, y: 70},{x: 150, y: 10}];
+    const line2 = [{x:100, y: 20},{x:50, y: 200}];
+    const intersection = lineIntersection(line1, line2);
 
-const d = 'M -20 -30 A 0 1.5 30 1 0 300 200'
+    [line1,line2].forEach(line => {
+        const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+        path.setAttribute('d', `M ${line[0].x} ${line[0].y} L ${line[1].x} ${line[1].y}`);
+        path.setAttribute('fill', 'transparent');
+        path.setAttribute('stroke', 'magenta');
+        svg.appendChild(path);
+    })
 
-const cubics = cubicCommands(absoluteCommands(parsePath(d)));
+    const circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    circle.setAttribute('r', 2);
+    circle.setAttribute('cx', intersection.x);
+    circle.setAttribute('cy', intersection.y);
+    circle.setAttribute('fill', 'red');
+    svg.appendChild(circle);
 
-console.log(cubics)
-
-
-
-
-const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-svg.setAttribute('viewBox', '-300 -300 600 600');
-svg.setAttribute('height', 500);
-
-
-
-const path2 = document.createElementNS('http://www.w3.org/2000/svg','path');
-path2.setAttribute('d', d);
-path2.setAttribute('fill', 'transparent');
-path2.setAttribute('stroke', 'black');
-path2.setAttribute('stroke-width',10);
-
-const path = document.createElementNS('http://www.w3.org/2000/svg','path');
-const dNew = cubics.map(c => c.type + c.params.join(',')).join('');
-console.log(dNew)
-path.setAttribute('d', dNew);
-path.setAttribute('fill', 'transparent');
-path.setAttribute('stroke', 'aqua')
-
-
-document.addEventListener('DOMContentLoaded',()=>{
     document.body.appendChild(svg);
-    svg.appendChild(path2);
-    svg.appendChild(path);
-})
+}
