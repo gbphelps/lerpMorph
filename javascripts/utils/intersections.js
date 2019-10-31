@@ -69,6 +69,7 @@ export function intersectionDistance(l1points, l2points){
     const x_range1 = l1points.map(p => p.x).sort((a,b) => a - b);
     const x_range2 = l2points.map(p => p.x).sort((a,b) => a - b);
     if (
+        intersection &&
         x_range1[0] <= intersection.x && 
         x_range1[1] >= intersection.x && 
         x_range2[0] <= intersection.x &&
@@ -92,12 +93,14 @@ export function intersectionDistance(l1points, l2points){
 }
 
 export function findIntersections(ctrlPoints1, ctrlPoints2){
-    const tests = [[ctrlPoints1, ctrlPoints2]];
-    i = 0;
-    while (tests.length && i < 100){
+    const tests = [[ctrlPoints1, ctrlPoints2,{x: Infinity, y: Infinity}]];
+    const intersections = [];
+    //TODO you need to cache the proceeding segmentation for each curve. There are probably other things you need to cache too.
+    let i = 0;
+    while (tests.length && i < 1000){
+        console.log(intersections);
         i++;
-        const [curve1, curve2] = tests.shift();
-        console.log({curve1, curve2})
+        const [curve1, curve2, prevIntersectionEstimate] = tests.shift();
         const cseg1 = segment(curve1, 3);
         const cseg2 = segment(curve2, 3);
         const lines1 = cseg1.map(points => [points[0], points[points.length-1]]);
@@ -106,12 +109,26 @@ export function findIntersections(ctrlPoints1, ctrlPoints2){
             const one = lines1[i];
             for (let j=0; j<lines2.length; j++){
                 const two = lines2[j];
-                if (intersectionDistance(one,two) < 1){
-                    tests.push([cseg1[i],cseg2[j]])
+                const intersection = lineIntersection(one,two);
+                if (
+                    intersection && 
+                    Math.abs(prevIntersectionEstimate.x - intersection.x) < 1e-8 &&
+                    Math.abs(prevIntersectionEstimate.y - intersection.y) < 1e-8 &&
+                    !(
+                        intersections.filter(ix => 
+                            Math.abs(ix.x - intersection.x) < 1e-8 && 
+                            Math.abs(ix.y - intersection.y) < 1e-8
+                        )
+                    ).length
+                ){ 
+                    intersections.push(intersection);
+                } else if (intersectionDistance(one,two) < 1){
+                    tests.push([cseg1[i],cseg2[j],intersection])
                 }
             }
         }
     }
+    return intersections;
 }
 
 //if errorToLine < 1, let's say there *might* be an intersection, so recurse.
