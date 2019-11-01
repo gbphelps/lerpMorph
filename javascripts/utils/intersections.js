@@ -97,8 +97,8 @@ export function findIntersections(ctrlPoints1, ctrlPoints2){
     const intersections = [];
     //TODO you need to cache the proceeding segmentation for each curve. There are probably other things you need to cache too.
     let i = 0;
-    while (tests.length && i < 1000){
-        console.log(intersections);
+    while (tests.length && i < 10000){
+        console.log(i);
         i++;
         const [curve1, curve2, prevIntersectionEstimate] = tests.shift();
         const cseg1 = segment(curve1, 3);
@@ -122,7 +122,10 @@ export function findIntersections(ctrlPoints1, ctrlPoints2){
                     ).length
                 ){ 
                     intersections.push(intersection);
-                } else if (intersectionDistance(one,two) < 1){
+                } else if (intersectionDistance(one,two) < .1 ){
+                    //TODO see if you can remove the intersectionDistance function
+                    //and just check for actual intersection with `lineIntersection`
+                    //without missing valid intersections.
                     tests.push([cseg1[i],cseg2[j],intersection])
                 }
             }
