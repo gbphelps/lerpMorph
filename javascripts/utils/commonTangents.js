@@ -72,9 +72,9 @@ const df2dt = (t,s) => (
     ) / denom(t,s)
 )
 
-// [(Ay - By)(dBx/ds) - (dBy/ds)(Ax - Bx)] / (Ax - Bx)**2
+// --[(dBy/ds)(Ax - Bx) - (Ay - By)(dBx/ds)] / (Ax - Bx)**2
 const df2ds = (t,s) => (
     ( 
-        deriv(bx)(s) * ab_y(t,s) - deriv(by)(s) * ab_x(t,s)
+        deriv(by)(s) * ab_x(t,s) - deriv(bx)(s) * ab_y(t,s) 
     ) / denom(t,s)
 )
