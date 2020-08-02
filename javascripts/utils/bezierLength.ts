@@ -3,13 +3,13 @@
 // (e.g. Six-point or Seven-point quadrature) if you need even more precision.
 // Convergence is incredibly fast. https://en.wikipedia.org/wiki/Gaussian_quadrature
 
-import { QuadNums, QuadPoints } from '../types';
 import integral from './integral';
 import { derivative } from './sharedFunctions';
+import { Point } from '../types';
 
-export default function arcLength(controlPoints: QuadPoints) {
-  const dxdt = derivative(controlPoints.map((p) => p.x) as QuadNums);
-  const dydt = derivative(controlPoints.map((p) => p.y)as QuadNums);
+export default function arcLength(controlPoints: Point[]) {
+  const dxdt = derivative(controlPoints.map((p) => p.x));
+  const dydt = derivative(controlPoints.map((p) => p.y));
 
   // derivative of arclength; the thing to be integrated
   function dArcLength(t: number) {

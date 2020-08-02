@@ -1,6 +1,6 @@
 import split from './splitBezier';
 import arcLength from './bezierLength';
-import { QuadPoints } from '../types';
+import { Point } from '../types';
 
 // this is a (sort of lazy) binary search to split a curve at a given arclength.
 // takes in the control points `ctrlPoints` and a desired clipping length `targetLength`.
@@ -9,7 +9,7 @@ import { QuadPoints } from '../types';
 // `targetLength` units long. The second is the remainder of the curve.
 
 // NOTE this function will NOT NECESSARILY CONVERGE if the error of your length function is higher than the error of this one!
-export default function getTforLength(ctrlPoints: QuadPoints, targetLength: number) {
+export default function getTforLength(ctrlPoints: Point[], targetLength: number) {
   const cutoff = 100;
 
   const getLength = arcLength(ctrlPoints);

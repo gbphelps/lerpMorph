@@ -98,8 +98,4 @@ export interface Point {
   }
 
 export interface Vector extends Point {}
-
-export type QuadPoints = [Point, Point, Point, Point];
-export type QuadNums = [number, number, number, number];
-
 export type Matrix = number[][];

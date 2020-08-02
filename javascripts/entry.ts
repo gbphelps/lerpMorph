@@ -1,13 +1,13 @@
 import parsePath from './utils/parsePath';
 import absoluteCommands from './utils/absoluteCommands';
 import cubicCommands from './utils/cubicCommands';
-import { AnyCommand, QuadNums, QuadPoints } from './types';
 import arclength from './utils/bezierLength';
-import { curveWithOffset } from './utils/sharedFunctions';
-import area from './utils/areaOfCubicCollection';
+import area from './utils/cubicCollections/area';
+import extractCubics from './utils/cubicCollections/extractCubics';
+import centroid from './utils/cubicCollections/centroid';
 
 function init() {
-  const d = 'M 0 0 A 10 10 0 0 0 20 0 Z';
+  const d = 'M 0 0 A 10 10 0 0 0 20 0 C 40 0 0 -20 10 -40 A 20 20 0 0 0 50 50 Z';
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svg.setAttribute('viewBox', '-100 -100 200 200');
   const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -28,66 +28,24 @@ function init() {
   path2.setAttribute('d', d2);
   svg.appendChild(path2);
 
-  c(cmds);
+  demo(d);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
   init();
 });
 
-function c(cmds: AnyCommand[]) {
-  const controlPointCollections = [];
-  for (let i = 1; i < cmds.length; i++) {
-    const controlPoints = [];
-    const prevParams = cmds[i - 1].params;
-    controlPoints.push({
-      x: prevParams[prevParams.length - 2],
-      y: prevParams[prevParams.length - 1],
-    });
-    for (let j = 0; j < 3; j++) {
-      controlPoints.push({
-        x: cmds[i].params[j * 2],
-        y: cmds[i].params[j * 2 + 1],
-      });
-    }
-    controlPointCollections.push(controlPoints);
-  }
-  animate(controlPointCollections as QuadPoints[]);
-  // centroid(controlPointCollections as QuadPoints[]);
-  console.log(area(controlPointCollections as QuadPoints[]));
-  console.log(controlPointCollections.reduce(
-    (acc, cps) => arclength(cps as QuadPoints)(0, 1) + acc, 0,
+function demo(d: string) {
+  const cubics = extractCubics(d);
+  const c = centroid(cubics);
+  const pp = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  pp.setAttribute('r', '1');
+  pp.setAttribute('cx', c.x.toString());
+  pp.setAttribute('cy', c.y.toString());
+  document.getElementsByTagName('svg')[0].appendChild(pp);
+
+  console.log(area(cubics));
+  console.log(cubics.reduce(
+    (acc, cps) => arclength(cps)(0, 1) + acc, 0,
   ));
-}
-
-function animate(controlPointCollections: QuadPoints[]) {
-  const fns = controlPointCollections.map((controlPoints, i) => {
-    const cX = curveWithOffset(controlPoints.map((p) => p.x) as QuadNums, i);
-    const cY = curveWithOffset(controlPoints.map((p) => p.y) as QuadNums, i);
-    return {
-      x: cX,
-      y: cY,
-    };
-  });
-
-  let i = 0;
-
-  const point = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-  point.setAttribute('r', '2');
-  document.getElementsByTagName('svg')[0].appendChild(point);
-
-  function _a() {
-    if (i >= 500) return;
-    const k = i / 500 * fns.length;
-    const idx = Math.floor(k);
-
-    const x = fns[idx].x(k);
-    const y = fns[idx].y(k);
-    point.setAttribute('cx', x.toString());
-    point.setAttribute('cy', y.toString());
-    requestAnimationFrame(_a);
-    i++;
-  }
-
-  _a();
 }
