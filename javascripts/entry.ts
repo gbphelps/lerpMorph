@@ -3,10 +3,11 @@ import absoluteCommands from './utils/absoluteCommands';
 import cubicCommands from './utils/cubicCommands';
 import { AnyCommand, QuadNums, QuadPoints } from './types';
 import arclength from './utils/bezierLength';
-import integral from './utils/integral';
+import { curveWithOffset } from './utils/sharedFunctions';
+import area from './utils/areaOfCubicCollection';
 
 function init() {
-  const d = 'M 0 0 A 10 10 0 0 0 20 0';
+  const d = 'M 0 0 A 10 10 0 0 0 20 0 Z';
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svg.setAttribute('viewBox', '-100 -100 200 200');
   const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -59,29 +60,10 @@ function c(cmds: AnyCommand[]) {
   ));
 }
 
-function curve(c: QuadNums, tStart: number) {
-  return function curveFunc(t: number) {
-    const tMod = t - tStart;
-    return c[0] * (1 - tMod) * (1 - tMod) * (1 - tMod)
-      + c[1] * 3 * (1 - tMod) * (1 - tMod) * tMod
-      + c[2] * 3 * (1 - tMod) * tMod * tMod
-      + c[3] * tMod * tMod * tMod;
-  };
-}
-
-function deriv(c: QuadNums, tStart: number) {
-  return function curveDerivFunc(t: number) {
-    const tMod = t - tStart;
-    return 3 * (1 - tMod) * (1 - tMod) * (c[1] - c[0])
-    - 6 * (1 - tMod) * tMod * (c[2] - c[1])
-    + 3 * tMod * tMod * (c[3] - c[2]);
-  };
-}
-
 function animate(controlPointCollections: QuadPoints[]) {
   const fns = controlPointCollections.map((controlPoints, i) => {
-    const cX = curve(controlPoints.map((p) => p.x) as QuadNums, i);
-    const cY = curve(controlPoints.map((p) => p.y) as QuadNums, i);
+    const cX = curveWithOffset(controlPoints.map((p) => p.x) as QuadNums, i);
+    const cY = curveWithOffset(controlPoints.map((p) => p.y) as QuadNums, i);
     return {
       x: cX,
       y: cY,
@@ -108,20 +90,4 @@ function animate(controlPointCollections: QuadPoints[]) {
   }
 
   _a();
-}
-
-function area(collections: QuadPoints[]) {
-  const fns = collections.map((controlPoints, i) => {
-    const x = curve(controlPoints.map((p) => p.x) as QuadNums, i);
-    const y = curve(controlPoints.map((p) => p.y) as QuadNums, i);
-    const dx = deriv(controlPoints.map((p) => p.x) as QuadNums, i);
-    const dy = deriv(controlPoints.map((p) => p.y) as QuadNums, i);
-    const func = (t: number) => 0.5 * (x(t) * dy(t) - y(t) * dx(t)); // ???????
-    return func;
-  });
-  let sum = 0;
-  for (let i = 0; i < fns.length; i++) {
-    sum += integral(i, i + 1, fns[i]);
-  }
-  return sum;
 }

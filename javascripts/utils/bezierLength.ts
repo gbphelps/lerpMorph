@@ -5,19 +5,11 @@
 
 import { QuadNums, QuadPoints } from '../types';
 import integral from './integral';
+import { derivative } from './sharedFunctions';
 
 export default function arcLength(controlPoints: QuadPoints) {
-  function deriv(c: QuadNums) {
-    return function curve(t: number) {
-      return -3 * c[0] * (1 - t) * (1 - t)
-          + 3 * c[1] * (1 - t) * (1 - 3 * t)
-          + 3 * c[2] * t * (2 - 3 * t)
-          + 3 * c[3] * t * t;
-    };
-  }
-
-  const dxdt = deriv(controlPoints.map((p) => p.x) as QuadNums);
-  const dydt = deriv(controlPoints.map((p) => p.y)as QuadNums);
+  const dxdt = derivative(controlPoints.map((p) => p.x) as QuadNums);
+  const dydt = derivative(controlPoints.map((p) => p.y)as QuadNums);
 
   // derivative of arclength; the thing to be integrated
   function dArcLength(t: number) {

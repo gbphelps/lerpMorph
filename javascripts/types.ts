@@ -5,6 +5,8 @@ export type AbsoluteCommand = {
   params: number[],
 }
 
+export type functionIn2D = (arg: number) => number;
+
 export interface HorizontalCommand {
   type: 'H' | 'h',
   params: number[]
