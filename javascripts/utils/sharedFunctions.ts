@@ -25,6 +25,15 @@ export function derivativeWithOffset(c: number[], t0: number) {
   };
 }
 
+// (t:number) => c[0]
+//     + (3 * c[1] - 3 * c[0]) * t
+//     + (3 * c[2] - 6 * c[1] + 3 * c[0]) * t * t
+//     + (c[3] - 3 * c[2] + 3 * c[1] - c[0]) * t * t * t;
+
+// A: (c[3] - 3 * c[2] + 3 * c[1] - c[0])
+// B: (3 * c[2] - 6 * c[1] + 3 * c[0])
+// C: (3 * c[1] - 3 * c[0])
+// D: c[0] - X
 export function curve(c: number[]): functionIn2D {
   return curveWithOffset(c, 0);
 }

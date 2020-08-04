@@ -5,7 +5,7 @@ import { Point } from '../../types';
 
 export default function extractCubics(pathString: string) {
   const cmds = cubicCommands(absoluteCommands(parsePath(pathString)));
-  const controlPointCollections: Point[][] = [];
+  const cubics: Point[][] = [];
   for (let i = 1; i < cmds.length; i++) {
     const controlPoints = [];
     const prevParams = cmds[i - 1].params;
@@ -19,7 +19,7 @@ export default function extractCubics(pathString: string) {
         y: cmds[i].params[j * 2 + 1],
       });
     }
-    controlPointCollections.push(controlPoints);
+    cubics.push(controlPoints);
   }
-  return controlPointCollections;
+  return cubics;
 }

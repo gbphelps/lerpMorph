@@ -5,8 +5,8 @@ import { Point } from '../../types';
 import { curveWithOffset, derivativeWithOffset } from '../sharedFunctions';
 import integral from '../integral';
 
-export default function area(collections: Point[][]) {
-  const fns = collections.map((controlPoints, i) => {
+export default function area(cubics: Point[][]) {
+  const fns = cubics.map((controlPoints, i) => {
     const x = curveWithOffset(controlPoints.map((p) => p.x), i);
     const y = curveWithOffset(controlPoints.map((p) => p.y), i);
     const dx = derivativeWithOffset(controlPoints.map((p) => p.x), i);

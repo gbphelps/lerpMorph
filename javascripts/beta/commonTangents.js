@@ -1,5 +1,7 @@
 /*
 
+http://web.mit.edu/18.06/www/Spring17/Multidimensional-Newton.pdf
+
 function curve(c) {
   return function curveFunc(t) {
     return c[0] * (1 - t) * (1 - t) * (1 - t)

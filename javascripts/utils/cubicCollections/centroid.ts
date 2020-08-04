@@ -3,11 +3,11 @@ import area from './area';
 import { derivativeWithOffset, curveWithOffset } from '../sharedFunctions';
 import integral from '../integral';
 
-export default function centroid(controlPointCollections: Point[][]) {
-  const A = area(controlPointCollections);
+export default function centroid(cubics: Point[][]) {
+  const A = area(cubics);
   let xbar = 0;
   let ybar = 0;
-  controlPointCollections.forEach((c, i) => {
+  cubics.forEach((c, i) => {
     const dx = derivativeWithOffset(c.map((p) => p.x), i);
     const dy = derivativeWithOffset(c.map((p) => p.y), i);
     const x = curveWithOffset(c.map((p) => p.x), i);
