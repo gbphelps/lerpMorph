@@ -1,8 +1,7 @@
-/*
-
 import split from '../utils/splitBezier';
+import { Point } from '../types';
 
-export function segment(ctrlPoints, n) {
+export function segment(ctrlPoints: Point[], n: number) {
   const segments = [];
   let current = ctrlPoints;
   for (let i = 0; i < n - 1; i++) {
@@ -14,35 +13,35 @@ export function segment(ctrlPoints, n) {
   return segments;
 }
 
-export function lineIntersection(l1points, l2points) {
+export function lineIntersection(l1points: Point[], l2points: Point[]) {
   const [p0, p1] = l1points;
   const [p2, p3] = l2points;
 
-  const x_l1 = p1.x - p0.x;
-  const y_l2 = p3.y - p2.y;
-  const y_l1 = p1.y - p0.y;
-  const x_l2 = p3.x - p2.x;
+  const xL1 = p1.x - p0.x;
+  const yL2 = p3.y - p2.y;
+  const yL1 = p1.y - p0.y;
+  const xL2 = p3.x - p2.x;
 
-  const divisor = (x_l1) * (y_l2) - (y_l1) * (x_l2);
+  const divisor = (xL1) * (yL2) - (yL1) * (xL2);
   if (divisor === 0) return null;
-  const numerator = (x_l1) * (y_l2) * p2.x - (x_l2) * (x_l1) * (p2.y - p0.y) - (y_l1) * (x_l2) * p0.x;
+  const numerator = (xL1) * (yL2) * p2.x - (xL2) * (xL1) * (p2.y - p0.y) - (yL1) * (xL2) * p0.x;
 
   const x = numerator / divisor;
-  const y = (y_l1) / (x_l1) * (x - p0.x) + p0.y;
+  const y = (yL1) / (xL1) * (x - p0.x) + p0.y;
   return { x, y };
 }
 
-function mag(a) {
+function mag(a: Point) {
   return Math.sqrt(a.x * a.x + a.y * a.y);
 }
 
-function len(a, b) {
+function len(a: Point, b: Point) {
   const x = a.x - b.x;
   const y = a.y - b.y;
   return Math.sqrt(x * x + y * y);
 }
 
-export function distanceToLine(p, lpoints) {
+export function distanceToLine(p: Point, lpoints: Point[]) {
   if (!isPerpindicularInRange(p, lpoints)) return Infinity;
   const vec1 = { x: p.x - lpoints[0].x, y: p.y - lpoints[0].y };
   const vec2 = { x: lpoints[1].x - lpoints[0].x, y: lpoints[1].y - lpoints[0].y };
@@ -52,7 +51,7 @@ export function distanceToLine(p, lpoints) {
   return distanceToLine;
 }
 
-export function isPerpindicularInRange(p, lpoints) {
+export function isPerpindicularInRange(p: Point, lpoints: Point[]) {
   const m1 = -(lpoints[1].x - lpoints[0].x) / (lpoints[1].y - lpoints[0].y);
   const b1 = p.y - m1 * p.x;
   const m2 = -1 / m1;
@@ -63,21 +62,21 @@ export function isPerpindicularInRange(p, lpoints) {
   return false;
 }
 
-export function intersectionDistance(l1points, l2points) {
+export function intersectionDistance(l1points: Point[], l2points: Point[]) {
   const intersection = lineIntersection(l1points, l2points);
-  const x_range1 = l1points.map((p) => p.x).sort((a, b) => a - b);
-  const x_range2 = l2points.map((p) => p.x).sort((a, b) => a - b);
+  const xRange1 = l1points.map((p) => p.x).sort((a, b) => a - b);
+  const xRange2 = l2points.map((p) => p.x).sort((a, b) => a - b);
   if (
     intersection
-        && x_range1[0] <= intersection.x
-        && x_range1[1] >= intersection.x
-        && x_range2[0] <= intersection.x
-        && x_range2[1] >= intersection.x
+        && xRange1[0] <= intersection.x
+        && xRange1[1] >= intersection.x
+        && xRange2[0] <= intersection.x
+        && xRange2[1] >= intersection.x
   ) return 0;
 
-  const l1_len = len(...l1points);
-  const l2_len = len(...l2points);
-  const avg_len = (l1_len + l2_len) / 2;
+  const l1Len = len(l1points[0], l1points[1]);
+  const l2Len = len(l2points[0], l2points[1]);
+  const avgLen = (l1Len + l2Len) / 2;
 
   return Math.min(
     distanceToLine(l1points[0], l2points),
@@ -88,18 +87,22 @@ export function intersectionDistance(l1points, l2points) {
     len(l1points[1], l2points[0]),
     len(l1points[0], l2points[1]),
     len(l1points[1], l2points[1]),
-  ) / avg_len;
+  ) / avgLen;
 }
 
-export function findIntersections(ctrlPoints1, ctrlPoints2) {
-  const tests = [[ctrlPoints1, ctrlPoints2, { x: Infinity, y: Infinity }]];
+export function findIntersections(ctrlPoints1: Point[], ctrlPoints2: Point[]) {
+  const tests = [{
+    curve1: ctrlPoints1,
+    curve2: ctrlPoints2,
+    prevIntersectionEstimate: { x: Infinity, y: Infinity },
+  }];
   const intersections = [];
   // TODO you need to cache the proceeding segmentation for each curve. There are probably other things you need to cache too.
   let i = 0;
   while (tests.length && i < 10000) {
     console.log(i);
     i++;
-    const [curve1, curve2, prevIntersectionEstimate] = tests.shift();
+    const { curve1, curve2, prevIntersectionEstimate } = tests.shift()!;
     const cseg1 = segment(curve1, 3);
     const cseg2 = segment(curve2, 3);
     const lines1 = cseg1.map((points) => [points[0], points[points.length - 1]]);
@@ -123,14 +126,16 @@ export function findIntersections(ctrlPoints1, ctrlPoints2) {
           // TODO see if you can remove the intersectionDistance function
           // and just check for actual intersection with `lineIntersection`
           // without missing valid intersections.
-          tests.push([cseg1[i], cseg2[j], intersection]);
+          tests.push({
+            curve1: cseg1[i],
+            curve2: cseg2[j],
+            prevIntersectionEstimate: intersection!,
+          });
         }
       }
     }
   }
   return intersections;
 }
-
-*/
 
 // if errorToLine < 1, let's say there *might* be an intersection, so recurse.

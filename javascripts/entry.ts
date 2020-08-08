@@ -1,3 +1,4 @@
+import { getCubicRoots } from 'minimatrix-polyroots';
 import parsePath from './utils/parsePath';
 import absoluteCommands from './utils/absoluteCommands';
 import cubicCommands from './utils/cubicCommands';
@@ -5,7 +6,6 @@ import arclength from './utils/bezierLength';
 import area from './utils/cubicCollections/area';
 import extractCubics from './utils/cubicCollections/extractCubics';
 import centroid from './utils/cubicCollections/centroid';
-import { curve } from './utils/sharedFunctions';
 
 function init() {
   const d = 'M 0 0 L 40 0 A 20 20 0 0 0 0 0';
@@ -39,16 +39,37 @@ document.addEventListener('DOMContentLoaded', () => {
 function demo(d: string) {
   const cubics = extractCubics(d);
   const c = centroid(cubics);
+
+  // A: (c[3] - 3 * c[2] + 3 * c[1] - c[0])
+  // B: (3 * c[2] - 6 * c[1] + 3 * c[0])
+  // C: (3 * c[1] - 3 * c[0])
+  // D: c[0] - X
+
+  interface ComplexNumber {
+    real: number,
+    imag: number,
+  }
+
+  cubics.forEach((points) => {
+    const roots = getCubicRoots(
+      points[3].x - 3 * points[2].x + 3 * points[1].x - points[0].x,
+      3 * points[2].x - 6 * points[1].x + 3 * points[0].x,
+      3 * points[1].x - 3 * points[0].x,
+      points[0].x - c.x,
+    ).filter(({ real, imag }: ComplexNumber) => {
+      if (imag) return false;
+      if (real > 1 || real < 0) return false;
+      return true;
+    });
+    console.log({ points, roots });
+  });
+
   console.log(c);
   const pp = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
   pp.setAttribute('r', '1');
   pp.setAttribute('cx', c.x.toString());
   pp.setAttribute('cy', c.y.toString());
   document.getElementsByTagName('svg')[0].appendChild(pp);
-
-  console.log(curve([1, 4, -10, 12])(0.5));
-  console.log(curve([1, 4, -10, 12])(0.1));
-  console.log(curve([1, 4, -10, 12])(0.8));
 
   console.log(area(cubics));
   console.log(cubics.reduce(
