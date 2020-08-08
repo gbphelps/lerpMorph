@@ -5,8 +5,10 @@ const SEGMENT_COUNT = 3;
 const PRECISION = 1e-4;
 
 export function lineIntersection(l1points: Point[], l2points: Point[]) {
-  const [p0, p1] = l1points;
-  const [p2, p3] = l2points;
+  const p0 = l1points[0];
+  const p1 = l1points[3];
+  const p2 = l2points[0];
+  const p3 = l2points[3];
 
   const xL1 = p1.x - p0.x;
   const yL2 = p3.y - p2.y;
@@ -33,9 +35,9 @@ function len(a: Point, b: Point) {
 }
 
 export function distanceToLine(p: Point, lpoints: Point[]) {
-  if (!isPerpindicularInRange(p, lpoints)) return Infinity;
+  // if (!isPerpindicularInRange(p, lpoints)) return Infinity;
   const vec1 = { x: p.x - lpoints[0].x, y: p.y - lpoints[0].y };
-  const vec2 = { x: lpoints[1].x - lpoints[0].x, y: lpoints[1].y - lpoints[0].y };
+  const vec2 = { x: lpoints[3].x - lpoints[0].x, y: lpoints[3].y - lpoints[0].y };
   const crossProduct = vec1.x * vec2.y - vec1.y * vec2.x;
   const sin = crossProduct / (mag(vec1) * mag(vec2));
   const distanceToLine = Math.abs(mag(vec1) * sin);
@@ -43,7 +45,7 @@ export function distanceToLine(p: Point, lpoints: Point[]) {
 }
 
 export function isPerpindicularInRange(p: Point, lpoints: Point[]) {
-  const m1 = -(lpoints[1].x - lpoints[0].x) / (lpoints[1].y - lpoints[0].y);
+  const m1 = -(lpoints[3].x - lpoints[0].x) / (lpoints[3].y - lpoints[0].y);
   const b1 = p.y - m1 * p.x;
   const m2 = -1 / m1;
   const b2 = lpoints[0].y - m2 * lpoints[0].x;
@@ -54,10 +56,20 @@ export function isPerpindicularInRange(p: Point, lpoints: Point[]) {
 }
 
 export function goodIntersection(l1points: Point[], l2points: Point[], intersection: Point) {
-  const xRange1 = l1points.map((p) => p.x).sort((a, b) => a - b);
-  const xRange2 = l2points.map((p) => p.x).sort((a, b) => a - b);
-  const yRange1 = l1points.map((p) => p.y).sort((a, b) => a - b);
-  const yRange2 = l2points.map((p) => p.y).sort((a, b) => a - b);
+  const xRange1 = [l1points[0], l1points[3]].map((p) => p.x).sort((a, b) => a - b);
+  const xRange2 = [l2points[0], l2points[3]].map((p) => p.x).sort((a, b) => a - b);
+  const yRange1 = [l1points[0], l1points[3]].map((p) => p.y).sort((a, b) => a - b);
+  const yRange2 = [l2points[0], l2points[3]].map((p) => p.y).sort((a, b) => a - b);
+
+  const del1 = Math.max(
+    distanceToLine(l1points[1], l1points),
+    distanceToLine(l1points[2], l1points),
+  );
+  const del2 = Math.max(
+    distanceToLine(l2points[1], l2points),
+    distanceToLine(l2points[2], l2points),
+  );
+
   if (
     intersection
         && xRange1[0] <= intersection.x
@@ -69,6 +81,15 @@ export function goodIntersection(l1points: Point[], l2points: Point[], intersect
         && yRange2[0] <= intersection.y
         && yRange2[1] >= intersection.y
   ) return true;
+
+  const oopsFactor = Math.max(
+    len(l1points[0], intersection),
+    len(l1points[3], intersection),
+    len(l2points[0], intersection),
+    len(l2points[3], intersection),
+  );
+
+  if (oopsFactor < (del1 + del2) * 100) return true;
   return false;
 }
 
@@ -96,8 +117,8 @@ export function findIntersections(ctrlPoints1: Point[], ctrlPoints2: Point[]) {
     const { curve1, curve2, prevIntersectionEstimate } = tests.shift()!;
     const cseg1 = segment(curve1, SEGMENT_COUNT);
     const cseg2 = segment(curve2, SEGMENT_COUNT);
-    const lines1 = cseg1.map((points) => [points[0], points[points.length - 1]]);
-    const lines2 = cseg2.map((points) => [points[0], points[points.length - 1]]);
+    const lines1 = cseg1; // .map((points) => [points[0], points[points.length - 1]]);
+    const lines2 = cseg2; // .map((points) => [points[0], points[points.length - 1]]);
     for (let i = 0; i < lines1.length; i++) {
       const one = lines1[i];
       for (let j = 0; j < lines2.length; j++) {

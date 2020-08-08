@@ -10,7 +10,7 @@ export default function populate() {
   svg.setAttribute('viewBox', '0 0 200 200');
   svg.style.background = 'black';
 
-  const line1 = [{ x: 0, y: 0 }, { x: 1, y: 500 }, { x: 100, y: -200 }, { x: 150, y: 200 }];
+  const line1 = [{ x: 0, y: 0 }, { x: 1, y: 500 }, { x: 100, y: -350 }, { x: 150, y: 200 }];
   let pieces1 = segment(line1, 3);
   pieces1 = pieces1.map((p) => p.map(({ x, y }) => ({ x: x.toFixed(4), y: y.toFixed(4) })));
 
@@ -23,7 +23,7 @@ export default function populate() {
     svg.appendChild(line);
   });
 
-  const line2 = [{ x: 0, y: 80 }, { x: 400, y: 90 }, { x: -200, y: 0 }, { x: 200, y: 110 }];
+  const line2 = [{ x: 0, y: 80 }, { x: 400, y: 90 }, { x: -273, y: 0 }, { x: 200, y: 110 }];
   let pieces2 = segment(line2, 3);
   pieces2 = pieces2.map((p) => p.map(({ x, y }) => ({ x: x.toFixed(4), y: y.toFixed(4) })));
 
