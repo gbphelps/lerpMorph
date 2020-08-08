@@ -1,17 +1,8 @@
-import split from '../utils/splitBezier';
 import { Point } from '../types';
+import segment from '../utils/segmentCubic';
 
-export function segment(ctrlPoints: Point[], n: number) {
-  const segments = [];
-  let current = ctrlPoints;
-  for (let i = 0; i < n - 1; i++) {
-    const [seg, rest] = split(current, 1 / (n - i));
-    segments.push(seg);
-    current = rest;
-  }
-  segments.push(current);
-  return segments;
-}
+const SEGMENT_COUNT = 3;
+const PRECISION = 1e-4;
 
 export function lineIntersection(l1points: Point[], l2points: Point[]) {
   const [p0, p1] = l1points;
@@ -78,15 +69,14 @@ export function goodIntersection(l1points: Point[], l2points: Point[], intersect
         && yRange2[0] <= intersection.y
         && yRange2[1] >= intersection.y
   ) return true;
-
   return false;
 }
 
 function alreadyFound(intersection: Point, intersections: Point[]) {
   for (let i = 0; i < intersections.length; i++) {
     if (
-      Math.abs(intersection.x - intersections[i].x) < 1e-4
-      && Math.abs(intersection.y - intersections[i].y) < 1e-4
+      Math.abs(intersection.x - intersections[i].x) < PRECISION
+      && Math.abs(intersection.y - intersections[i].y) < PRECISION
     ) return true;
   }
   return false;
@@ -104,8 +94,8 @@ export function findIntersections(ctrlPoints1: Point[], ctrlPoints2: Point[]) {
   while (tests.length && i < 10000) {
     i++;
     const { curve1, curve2, prevIntersectionEstimate } = tests.shift()!;
-    const cseg1 = segment(curve1, 3);
-    const cseg2 = segment(curve2, 3);
+    const cseg1 = segment(curve1, SEGMENT_COUNT);
+    const cseg2 = segment(curve2, SEGMENT_COUNT);
     const lines1 = cseg1.map((points) => [points[0], points[points.length - 1]]);
     const lines2 = cseg2.map((points) => [points[0], points[points.length - 1]]);
     for (let i = 0; i < lines1.length; i++) {
@@ -117,11 +107,11 @@ export function findIntersections(ctrlPoints1: Point[], ctrlPoints2: Point[]) {
           continue;
         } else if (
           intersection
-                    && Math.abs(prevIntersectionEstimate.x - intersection.x) < 1e-4
-                    && Math.abs(prevIntersectionEstimate.y - intersection.y) < 1e-4
+                    && Math.abs(prevIntersectionEstimate.x - intersection.x) < PRECISION
+                    && Math.abs(prevIntersectionEstimate.y - intersection.y) < PRECISION
                     && !(
-                      intersections.filter((ix) => Math.abs(ix.x - intersection.x) < 1e-4
-                            && Math.abs(ix.y - intersection.y) < 1e-4)
+                      intersections.filter((ix) => Math.abs(ix.x - intersection.x) < PRECISION
+                            && Math.abs(ix.y - intersection.y) < PRECISION)
                     ).length
         ) {
           intersections.push(intersection);
