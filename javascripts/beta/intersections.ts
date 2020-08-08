@@ -62,32 +62,34 @@ export function isPerpindicularInRange(p: Point, lpoints: Point[]) {
   return false;
 }
 
-export function intersectionDistance(l1points: Point[], l2points: Point[]) {
-  const intersection = lineIntersection(l1points, l2points);
+export function goodIntersection(l1points: Point[], l2points: Point[], intersection: Point) {
   const xRange1 = l1points.map((p) => p.x).sort((a, b) => a - b);
   const xRange2 = l2points.map((p) => p.x).sort((a, b) => a - b);
+  const yRange1 = l1points.map((p) => p.y).sort((a, b) => a - b);
+  const yRange2 = l2points.map((p) => p.y).sort((a, b) => a - b);
   if (
     intersection
         && xRange1[0] <= intersection.x
         && xRange1[1] >= intersection.x
         && xRange2[0] <= intersection.x
         && xRange2[1] >= intersection.x
-  ) return 0;
+        && yRange1[0] <= intersection.y
+        && yRange1[1] >= intersection.y
+        && yRange2[0] <= intersection.y
+        && yRange2[1] >= intersection.y
+  ) return true;
 
-  const l1Len = len(l1points[0], l1points[1]);
-  const l2Len = len(l2points[0], l2points[1]);
-  const avgLen = (l1Len + l2Len) / 2;
+  return false;
+}
 
-  return Math.min(
-    distanceToLine(l1points[0], l2points),
-    distanceToLine(l1points[1], l2points),
-    distanceToLine(l2points[0], l1points),
-    distanceToLine(l2points[1], l1points),
-    len(l1points[0], l2points[0]),
-    len(l1points[1], l2points[0]),
-    len(l1points[0], l2points[1]),
-    len(l1points[1], l2points[1]),
-  ) / avgLen;
+function alreadyFound(intersection: Point, intersections: Point[]) {
+  for (let i = 0; i < intersections.length; i++) {
+    if (
+      Math.abs(intersection.x - intersections[i].x) < 1e-4
+      && Math.abs(intersection.y - intersections[i].y) < 1e-4
+    ) return true;
+  }
+  return false;
 }
 
 export function findIntersections(ctrlPoints1: Point[], ctrlPoints2: Point[]) {
@@ -100,7 +102,6 @@ export function findIntersections(ctrlPoints1: Point[], ctrlPoints2: Point[]) {
   // TODO you need to cache the proceeding segmentation for each curve. There are probably other things you need to cache too.
   let i = 0;
   while (tests.length && i < 10000) {
-    console.log(i);
     i++;
     const { curve1, curve2, prevIntersectionEstimate } = tests.shift()!;
     const cseg1 = segment(curve1, 3);
@@ -112,17 +113,19 @@ export function findIntersections(ctrlPoints1: Point[], ctrlPoints2: Point[]) {
       for (let j = 0; j < lines2.length; j++) {
         const two = lines2[j];
         const intersection = lineIntersection(one, two);
-        if (
+        if (!intersection || alreadyFound(intersection, intersections)) {
+          continue;
+        } else if (
           intersection
-                    && Math.abs(prevIntersectionEstimate.x - intersection.x) < 1e-8
-                    && Math.abs(prevIntersectionEstimate.y - intersection.y) < 1e-8
+                    && Math.abs(prevIntersectionEstimate.x - intersection.x) < 1e-4
+                    && Math.abs(prevIntersectionEstimate.y - intersection.y) < 1e-4
                     && !(
-                      intersections.filter((ix) => Math.abs(ix.x - intersection.x) < 1e-8
-                            && Math.abs(ix.y - intersection.y) < 1e-8)
+                      intersections.filter((ix) => Math.abs(ix.x - intersection.x) < 1e-4
+                            && Math.abs(ix.y - intersection.y) < 1e-4)
                     ).length
         ) {
           intersections.push(intersection);
-        } else if (intersectionDistance(one, two) < 0.1) {
+        } else if (goodIntersection(one, two, intersection)) {
           // TODO see if you can remove the intersectionDistance function
           // and just check for actual intersection with `lineIntersection`
           // without missing valid intersections.

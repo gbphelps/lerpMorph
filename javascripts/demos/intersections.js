@@ -1,6 +1,6 @@
 import { findIntersections } from '../beta/intersections';
 
-// document.addEventListener('DOMContentLoaded', populate);
+document.addEventListener('DOMContentLoaded', populate);
 
 export default function populate() {
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
