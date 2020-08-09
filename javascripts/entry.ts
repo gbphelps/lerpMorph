@@ -1,57 +1,78 @@
 import extractCubics from './utils/cubicCollections/extractCubics';
+import centroid from './utils/cubicCollections/centroid';
 import { Point } from './types';
 import alignRotation from './utils/cubicCollections/alignRotation';
-import centroid from './utils/cubicCollections/centroid';
+import arcLength from './utils/bezierLength';
 
 function init() {
-  const d = 'M 0 0 C -90 0 -40 -100 50 0 C 20 40 -20 -50 70 100 Z';
-  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svg.setAttribute('viewBox', '-100 -100 200 200');
-  document.body.appendChild(svg);
-  demo(d);
+  const d1 = 'M 3.58694 -42.7321 A 4 4 0 0 0 -3.58694 -42.7321 L -13.7639 -22.1112 A 4 4 0 0 1 -16.7757 -19.923 L -39.5322 -16.6163 A 4 4 0 0 0 -41.749 -9.79354 L -25.2823 6.25756 A 4 4 0 0 1 -24.1319 9.79808 L -28.0192 32.4626 A 4 4 0 0 0 -22.2154 36.6793 L -1.86136 25.9786 A 4 4 0 0 1 1.86136 25.9786 L 22.2154 36.6793 A 4 4 0 0 0 28.0192 32.4626 L 24.1319 9.79808 A 4 4 0 0 1 25.2823 6.25756 L 41.749 -9.79354 A 4 4 0 0 0 39.5322 -16.6163 L 16.7757 -19.923 A 4 4 0 0 1 13.7639 -22.1112 Z';
+  const d2 = 'M 20 0 C 0 0 0 -10 0 0 C -20 -40 0 -50 70 0 Z';
+  demo(d1, d2);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
   init();
 });
 
-function demo(d: string) {
-  const cubics = extractCubics(d);
-  const newCubics = alignRotation(cubics);
-  const c = centroid(cubics);
+function makePath(p: Point[], color: string) {
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path.setAttribute('d', `M ${p[0].x} ${p[0].y} C ${p[1].x} ${p[1].y} ${p[2].x} ${p[2].y} ${p[3].x} ${p[3].y}`);
+  path.setAttribute('stroke', color);
+  path.setAttribute('fill', 'transparent');
+  document.getElementsByTagName('svg')[0].appendChild(path);
+}
 
-  const l1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-  l1.setAttribute('stroke', 'black');
-  l1.setAttribute('x1', c.x.toString());
-  l1.setAttribute('x2', c.x.toString());
-  l1.setAttribute('y1', '-100');
-  l1.setAttribute('y2', '100');
-  l1.setAttribute('vector-effect', 'non-scaling-stroke');
-  l1.setAttribute('stroke-width', '0.5');
+function findSegment(breakPercents: number[], target: number) {
+  let floor = 0;
+  let ceil = breakPercents.length;
 
-  const l2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-  l2.setAttribute('stroke', 'black');
-  l2.setAttribute('x1', '-100');
-  l2.setAttribute('x2', '100');
-  l2.setAttribute('y1', c.y.toString());
-  l2.setAttribute('y2', c.y.toString());
-  l2.setAttribute('vector-effect', 'non-scaling-stroke');
-  l2.setAttribute('stroke-width', '0.5');
+  while (ceil - floor > 0) {
+    const idx = Math.floor((ceil + floor) / 2);
+    if (target > breakPercents[idx]) {
+      floor = idx + 1;
+    } else {
+      ceil = idx - 1;
+    }
+  }
 
-  // A: (c[3] - 3 * c[2] + 3 * c[1] - c[0])
-  // B: (3 * c[2] - 6 * c[1] + 3 * c[0])
-  // C: (3 * c[1] - 3 * c[0])
-  // D: c[0] - X
+  return target < breakPercents[floor] ? floor - 1 : floor;
+}
 
-  console.log('oh hi');
-  newCubics.forEach((points: Point[], i:number) => {
-    const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    p.setAttribute('stroke', ['red', 'orange', 'yellow', 'lime', 'blue', 'purple'][i % 6]);
-    p.setAttribute('d', `M ${points[0].x} ${points[0].y} C ${points[1].x} ${points[1].y} ${points[2].x} ${points[2].y} ${points[3].x} ${points[3].y}`);
-    p.setAttribute('fill', 'transparent');
-    document.getElementsByTagName('svg')[0].appendChild(p);
+function demo(d1: string, d2: string) {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '-100 -100 200 200');
+  document.body.appendChild(svg);
+  const bps = [d1, d2].map((d) => {
+    const cubics = extractCubics(d);
+    const c = centroid(cubics);
+    const center = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    center.setAttribute('cx', c.x.toString());
+    center.setAttribute('cy', c.y.toString());
+    center.setAttribute('r', '2');
+    svg.appendChild(center);
+
+    const newCubics = alignRotation(cubics);
+
+    const lengths: number[] = [0];
+    let lengthSum = 0;
+    newCubics.forEach((cubic, i) => {
+      makePath(cubic, ['red', 'orange', 'yellow', 'green', 'blue', 'purple'][i % 6]);
+      const length = arcLength(cubic)(0, 1);
+      lengthSum += length;
+      lengths.push(lengthSum);
+    });
+    const breakPercents = lengths.map((l) => l / lengthSum);
+    return {
+      breakPercents,
+      cubics,
+      length: lengthSum,
+    };
   });
 
-  document.getElementsByTagName('svg')[0].appendChild(l1);
-  document.getElementsByTagName('svg')[0].appendChild(l2);
+  console.log(bps);
+  bps[1].breakPercents.slice(1, -1).forEach((bp) => {
+    console.log(bp);
+    const floor = findSegment(bps[0].breakPercents, bp);
+    console.log(floor);
+  });
 }
