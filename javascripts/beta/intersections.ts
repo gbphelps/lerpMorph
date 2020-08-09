@@ -62,12 +62,12 @@ export function goodIntersection(l1points: Point[], l2points: Point[], intersect
   const yRange2 = [l2points[0], l2points[3]].map((p) => p.y).sort((a, b) => a - b);
 
   const del1 = Math.max(
-    distanceToLine(l1points[1], l1points),
-    distanceToLine(l1points[2], l1points),
+    len(l1points[1], l1points[0]),
+    len(l1points[2], l1points[3]),
   );
   const del2 = Math.max(
-    distanceToLine(l2points[1], l2points),
-    distanceToLine(l2points[2], l2points),
+    len(l2points[1], l2points[0]),
+    len(l2points[2], l2points[3]),
   );
 
   if (
@@ -89,7 +89,7 @@ export function goodIntersection(l1points: Point[], l2points: Point[], intersect
     len(l2points[3], intersection),
   );
 
-  if (oopsFactor < (del1 + del2) * 100) return true;
+  if (oopsFactor < (del1 + del2) * 2) return true;
   return false;
 }
 
@@ -149,6 +149,7 @@ export function findIntersections(ctrlPoints1: Point[], ctrlPoints2: Point[]) {
       }
     }
   }
+  console.log(i);
   return intersections;
 }
 
