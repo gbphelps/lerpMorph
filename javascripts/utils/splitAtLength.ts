@@ -15,10 +15,8 @@ export default function getTforLength(ctrlPoints: Point[], targetLength: number)
   const getLength = arcLength(ctrlPoints);
   const totalLength = getLength(0, 1);
   if (targetLength > totalLength) {
-    throw new Error(
-      `You indicated a target length of ${targetLength}, 
-    but the given curve is only ${totalLength} units long`,
-    );
+    console.log('WARNING: length requested was too large');
+    return split(ctrlPoints, 1);
   }
   const bounds = {
     low: 0,
@@ -37,8 +35,8 @@ export default function getTforLength(ctrlPoints: Point[], targetLength: number)
     i++;
   } while (i < cutoff && Math.abs(guess.len - targetLength) > 1e-16);
   if (i === cutoff) {
-    console.log('WARNING: the desired precision could not be obtained because of a mismatch of error magnitudes in one or more of the subordinate functions.');
+    // console.log('WARNING: the desired precision could not be obtained because of a mismatch of error magnitudes in one or more of the subordinate functions.');
   }
-  console.log(`took ${i} tries`);
+  // console.log(`took ${i} tries`);
   return split(ctrlPoints, guess.t);
 }
