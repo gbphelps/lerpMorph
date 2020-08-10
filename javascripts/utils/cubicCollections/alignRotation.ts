@@ -3,6 +3,7 @@ import { Point } from '../../types';
 import { curve } from '../sharedFunctions';
 import centroid from './centroid';
 import split from '../splitBezier';
+import area from './area';
 
 interface ComplexNumber {
     real: number,
@@ -12,6 +13,19 @@ interface ComplexNumber {
 function rotate<T>(arr: T[], turns: number) {
   const newTurns = turns - Math.floor(turns / arr.length) * arr.length;
   return arr.slice(newTurns).concat(arr.slice(0, newTurns));
+}
+
+function reverseAll(cubics:Point[][]) {
+  const newCubics = [];
+  for (let i = 0; i < cubics.length; i++) {
+    const newCubic = [];
+    const iPrime = cubics.length - 1 - i;
+    for (let j = 0; j < cubics[iPrime].length; j++) {
+      newCubic.push(cubics[iPrime][cubics[iPrime].length - 1 - j]);
+    }
+    newCubics.push(newCubic);
+  }
+  return newCubics;
 }
 
 export default function alignRotation(cubics: Point[][]) {
@@ -45,5 +59,5 @@ export default function alignRotation(cubics: Point[][]) {
   newCubics[0] = curve2;
   newCubics.push(curve1);
 
-  return newCubics;
+  return area(newCubics) > 0 ? newCubics : reverseAll(newCubics);
 }
