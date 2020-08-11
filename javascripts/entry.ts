@@ -3,6 +3,7 @@ import { Point } from './types';
 import alignRotation from './utils/cubicCollections/alignRotation';
 import arcLength from './utils/bezierLength';
 import splitAtLength from './utils/splitAtLength';
+import { add, sub, mult } from './utils/sharedFunctions';
 
 function init() {
   const d1 = 'M 3.58694 -42.7321 A 4 4 0 0 0 -3.58694 -42.7321 L -13.7639 -22.1112 A 4 4 0 0 1 -16.7757 -19.923 L -39.5322 -16.6163 A 4 4 0 0 0 -41.749 -9.79354 L -25.2823 6.25756 A 4 4 0 0 1 -24.1319 9.79808 L -28.0192 32.4626 A 4 4 0 0 0 -22.2154 36.6793 L -1.86136 25.9786 A 4 4 0 0 1 1.86136 25.9786 L 22.2154 36.6793 A 4 4 0 0 0 28.0192 32.4626 L 24.1319 9.79808 A 4 4 0 0 1 25.2823 6.25756 L 41.749 -9.79354 A 4 4 0 0 0 39.5322 -16.6163 L 16.7757 -19.923 A 4 4 0 0 1 13.7639 -22.1112 Z';
@@ -20,6 +21,14 @@ function makePath(p: Point[], color: string) {
   path.setAttribute('stroke', color);
   path.setAttribute('fill', 'transparent');
   document.getElementsByTagName('svg')[0].appendChild(path);
+}
+
+function cubicsToD(cubics: Point[][]) {
+  let d = `M ${cubics[0][0].x} ${cubics[0][0].y}`;
+  for (let i = 0; i < cubics.length; i++) {
+    d += `C ${cubics[i][1].x} ${cubics[i][1].y} ${cubics[i][2].x} ${cubics[i][2].y} ${cubics[i][3].x} ${cubics[i][3].y}`;
+  }
+  return d;
 }
 
 function findSegment(breakPercents: number[], target: number) {
@@ -82,6 +91,10 @@ function demo(d1: string, d2: string) {
         let lowerBound = a.breakPercents[j];
         const upperBound = a.breakPercents[j + 1];
         let length = a.lengths[j];
+        if (upperBound === lowerBound) {
+          j++;
+          continue;
+        }
         if (i === b.breakPercents.length - 1) {
           newCubics.push(cubic);
         } else if (lowerBound < spliceBP && spliceBP <= upperBound) {
@@ -96,6 +109,7 @@ function demo(d1: string, d2: string) {
             lowerBound = spliceBP;
             spliceBP = b.breakPercents[i + 1];
             i++;
+            // console.log({ spliceBP, lowerBound, upperBound });
           }
           newCubics.push(cubic);
         } else {
@@ -110,25 +124,41 @@ function demo(d1: string, d2: string) {
   const aNew = slice(bps[0], bps[1]);
   const bNew = slice(bps[1], bps[0]);
 
-  // const aa = aNew.map((c) => arcLength(c)(0, 1));
-  // const bb = bNew.map((c) => arcLength(c)(0, 1));
+  function getCurve(t: number) {
+    const curve: Point[][] = [];
+    for (let i = 0; i < aNew.length; i++) {
+      const cubic: Point[] = [];
+      for (let j = 0; j < aNew[0].length; j++) {
+        const diffVector = sub(bNew[i][j], aNew[i][j]);
+        cubic[j] = add(aNew[i][j], mult(diffVector, t));
+      }
+      curve.push(cubic);
+    }
+    return cubicsToD(curve);
+  }
 
-  // const tota = aa.reduce((acc, el) => acc + el, 0);
-  // const totb = bb.reduce((acc, el) => acc + el, 0);
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path.setAttribute('d', getCurve(0));
+  svg.appendChild(path);
 
-  // const aaa = aa.map((a) => a / tota);
-  // const bbb = bb.map((a) => a / totb);
-
-  // for (let i = 0; i < aaa.length || i < bbb.length; i++) {
-  //   console.log(aaa[i], bbb[i]);
-  // }
-
-  console.log(aNew.length, bNew.length);
-
-  aNew.forEach((c: Point[], i:number) => {
-    makePath(c, ['red', 'orange', 'yellow', 'lime', 'blue', 'purple'][i % 6]);
+  animate(1000, easeInOutQuint, (progress) => {
+    path.setAttribute('d', getCurve(progress));
   });
-  bNew.forEach((c: Point[], i:number) => {
-    makePath(c, ['red', 'orange', 'yellow', 'lime', 'blue', 'purple'][i % 6]);
-  });
+}
+
+function animate(millis:number, ease: (i: number) => number, task: (progress: number) => void) {
+  const t0 = Date.now();
+  function step() {
+    const t = Date.now();
+    if (t - t0 > millis) return;
+    const i = (t - t0) / millis;
+    const p = ease(i);
+    task(p);
+    requestAnimationFrame(step);
+  }
+  step();
+}
+
+function easeInOutQuint(x: number): number {
+  return x < 0.5 ? 16 * x * x * x * x * x : 1 - Math.pow(-2 * x + 2, 5) / 2;
 }

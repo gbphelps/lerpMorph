@@ -23,6 +23,7 @@ module.exports = {
       ts: 'never',
       tsx: 'never',
     }],
+    'no-restricted-properties': 'off',
     // these are replacements for airbnb rules that don't support ts
     'no-unused-vars': 'off',
     '@typescript-eslint/no-unused-vars': 'error',

@@ -1,19 +1,5 @@
 import { Point } from '../types';
-
-function mult(a: Point, b: number) {
-  return { x: a.x * b, y: a.y * b };
-}
-
-function add(...args: Point[]) {
-  return {
-    x: args.reduce((a, l) => a + l.x, 0),
-    y: args.reduce((a, l) => a + l.y, 0),
-  };
-}
-
-function sub(a: Point, b: Point) {
-  return { x: a.x - b.x, y: a.y - b.y };
-}
+import { add, mult, sub } from './sharedFunctions';
 
 // get the deCastlejau net @ t
 function intermediates(arr: Point[]) {

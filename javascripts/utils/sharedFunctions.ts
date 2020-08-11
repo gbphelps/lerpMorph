@@ -1,4 +1,4 @@
-import { functionIn2D } from '../types';
+import { functionIn2D, Point } from '../types';
 
 // Note: the t0 offsets allow you to parametrize a set of curves with a
 // single piecewise function. (First curve is 0 <= t < 1, second is 1 <= t < 2, etc.)
@@ -40,4 +40,19 @@ export function curve(c: number[]): functionIn2D {
 
 export function derivative(c: number[]): functionIn2D {
   return derivativeWithOffset(c, 0);
+}
+
+export function mult(a: Point, b: number) {
+  return { x: a.x * b, y: a.y * b };
+}
+
+export function add(...args: Point[]) {
+  return {
+    x: args.reduce((a, l) => a + l.x, 0),
+    y: args.reduce((a, l) => a + l.y, 0),
+  };
+}
+
+export function sub(a: Point, b: Point) {
+  return { x: a.x - b.x, y: a.y - b.y };
 }
