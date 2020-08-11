@@ -7,7 +7,7 @@ import { add, sub, mult } from './utils/sharedFunctions';
 
 function init() {
   const d1 = 'M 3.58694 -42.7321 A 4 4 0 0 0 -3.58694 -42.7321 L -13.7639 -22.1112 A 4 4 0 0 1 -16.7757 -19.923 L -39.5322 -16.6163 A 4 4 0 0 0 -41.749 -9.79354 L -25.2823 6.25756 A 4 4 0 0 1 -24.1319 9.79808 L -28.0192 32.4626 A 4 4 0 0 0 -22.2154 36.6793 L -1.86136 25.9786 A 4 4 0 0 1 1.86136 25.9786 L 22.2154 36.6793 A 4 4 0 0 0 28.0192 32.4626 L 24.1319 9.79808 A 4 4 0 0 1 25.2823 6.25756 L 41.749 -9.79354 A 4 4 0 0 0 39.5322 -16.6163 L 16.7757 -19.923 A 4 4 0 0 1 13.7639 -22.1112 Z';
-  const d2 = 'M 20 0 C -30 20 0 10 0 0 C -20 -40 0 -50 80 0 L 20 -20 Z';
+  const d2 = 'M -50 -50 L -25 -50 L -25 -25 Z';
   demo(d1, d2);
 }
 
@@ -141,7 +141,7 @@ function demo(d1: string, d2: string) {
   path.setAttribute('d', getCurve(0));
   svg.appendChild(path);
 
-  animate(1000, easeInOutQuint, (progress) => {
+  animate(3000, easeInOutQuint, (progress) => {
     path.setAttribute('d', getCurve(progress));
   });
 }
