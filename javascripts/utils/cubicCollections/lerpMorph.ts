@@ -3,7 +3,9 @@ import extractCubics from './extractCubics';
 import alignRotation from './alignRotation';
 import arcLength from '../bezierLength';
 import splitAtLength from '../splitAtLength';
-import { add, sub, mult } from '../sharedFunctions';
+import {
+  add, sub, mult, cubicsToPath,
+} from '../sharedFunctions';
 
 interface CubicData {
     breakPercents: number[],
@@ -12,15 +14,7 @@ interface CubicData {
     lengths: number[],
   }
 
-function cubicsToD(cubics: Point[][]) {
-  let d = `M ${cubics[0][0].x} ${cubics[0][0].y}`;
-  for (let i = 0; i < cubics.length; i++) {
-    d += `C ${cubics[i][1].x} ${cubics[i][1].y} ${cubics[i][2].x} ${cubics[i][2].y} ${cubics[i][3].x} ${cubics[i][3].y}`;
-  }
-  return d;
-}
-
-function getCubicData(d: string) {
+export function getCubicData(d: string) {
   const cubics = extractCubics(d);
   const newCubics = alignRotation(cubics);
 
@@ -42,7 +36,7 @@ function getCubicData(d: string) {
   };
 }
 
-function slice(a: CubicData, b: CubicData) {
+export function slice(a: CubicData, b: CubicData) {
   const newCubics = [];
   let i = 1;
   let j = 0;
@@ -53,7 +47,7 @@ function slice(a: CubicData, b: CubicData) {
       let lowerBound = a.breakPercents[j];
       const upperBound = a.breakPercents[j + 1];
       let length = a.lengths[j];
-      if (upperBound === lowerBound) {
+      if (upperBound === 1 && lowerBound === 1) {
         j++;
         continue;
       }
@@ -80,6 +74,9 @@ function slice(a: CubicData, b: CubicData) {
       j++;
     }
   }
+  //   const a_ = newCubics.map((c) => arcLength(c)(0, 1));
+  //   const aa = a_.reduce((ac:number, n: number) => ac + n, 0);
+  //   console.log(a_.map((be) => be / aa));
   return newCubics;
 }
 
@@ -100,7 +97,7 @@ export default function lerpMorph(a: string, b: string) {
       }
       curve.push(cubic);
     }
-    return cubicsToD(curve);
+    return cubicsToPath(curve);
   }
 
   return getCurve;

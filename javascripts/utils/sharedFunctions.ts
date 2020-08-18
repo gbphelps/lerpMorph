@@ -56,3 +56,11 @@ export function add(...args: Point[]) {
 export function sub(a: Point, b: Point) {
   return { x: a.x - b.x, y: a.y - b.y };
 }
+
+export function cubicsToPath(cubics: Point[][]) {
+  let d = `M ${cubics[0][0].x} ${cubics[0][0].y}`;
+  for (let i = 0; i < cubics.length; i++) {
+    d += `C ${cubics[i][1].x} ${cubics[i][1].y} ${cubics[i][2].x} ${cubics[i][2].y} ${cubics[i][3].x} ${cubics[i][3].y}`;
+  }
+  return d;
+}
