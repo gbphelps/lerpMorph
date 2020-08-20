@@ -8,6 +8,7 @@
 
 import { AnyCommand, AbsoluteCommandType, toUpperCaseMap } from '../types';
 
+// TODO EACH OF THESE COMMANDS NEEDS TO ITERATE UNTIL THE PARAMS ARE EMPTY - YOU DON'T HAVE TO KEEP LISTING THE COMMAND IF THEY'RE CHAINED
 export default function AbsoluteCommandTypes(commands: AnyCommand[]) {
   const degenerateCommands = new Set(['H', 'V', 'h', 'v']);
   const RelativeCommandTypes = new Set(['m', 'l', 'c', 'q', 's', 't', 'a']);
