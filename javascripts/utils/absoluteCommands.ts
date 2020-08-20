@@ -13,8 +13,7 @@ export default function AbsoluteCommandTypes(commands: AnyCommand[]) {
   const degenerateCommands = new Set(['H', 'V', 'h', 'v']);
   const RelativeCommandTypes = new Set(['m', 'l', 'c', 'q', 's', 't', 'a']);
   const shortcuts = new Set(['S', 'T', 's', 't']);
-  const validPredecessor = { S: 'C', T: 'Q' };
-  // TODO: S and T can also be chained., so validPredecessor needs to be arrays [S, C] and [Q,T]
+  const validPredecessor = { S: new Set(['C', 'S']), T: new Set(['Q', 'T']) };
 
   const normalizedCommands: {type: AbsoluteCommandType, params: any}[] = [];
   let start = [0, 0];
@@ -62,7 +61,7 @@ export default function AbsoluteCommandTypes(commands: AnyCommand[]) {
     if (shortcuts.has(type)) {
       let control = null;
       const uppercase = toUpperCaseMap[type] as 'S' | 'T';
-      if (!prev || validPredecessor[uppercase] !== prev.type) {
+      if (!prev || !validPredecessor[uppercase].has(prev.type)) {
         control = [x, y];
         // use current cursor position.
       } else {
