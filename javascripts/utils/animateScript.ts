@@ -2,17 +2,23 @@ export default function animate(
   millis: number,
   ease: (i: number) => number,
   task: (progress: number) => void,
-) {
-  const t0 = Date.now();
-  function step() {
-    const t = Date.now();
-    if (t - t0 > millis) return;
-    const i = (t - t0) / millis;
-    const p = ease(i);
-    task(p);
-    requestAnimationFrame(step);
-  }
-  step();
+): Promise<void> {
+  return new Promise((r) => {
+    const t0 = Date.now();
+    function step() {
+      const t = Date.now();
+      const percent = Math.min((t - t0) / millis, 1);
+      const progress = ease(percent);
+      task(progress);
+
+      if (percent === 1) {
+        r();
+      } else {
+        requestAnimationFrame(step);
+      }
+    }
+    step();
+  });
 }
 
 export function easeInOutQuint(x: number): number {
@@ -22,6 +28,7 @@ export function easeInOutQuint(x: number): number {
 export function easeOutElastic(x: number): number {
   const c4 = (2 * Math.PI) / 3;
 
+  // eslint-disable-next-line no-nested-ternary
   return x === 0
     ? 0
     : x === 1
